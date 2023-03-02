@@ -1,0 +1,56 @@
+---
+title: "epidemiology"
+output: html_document
+date: '2023-03-01'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Goal - get the prevalence data unnested
+
+```{r}
+library(xml2)
+library(tidyverse)
+
+xml_address = "en_product9_prev.xml"
+
+diseases_raw = as_list(read_xml(xml_address))
+
+diseases_df = tibble::as_tibble(diseases_raw) %>%
+  unnest_longer(JDBOR)
+
+disease_df_wider = diseases_df %>%
+  dplyr::filter(JDBOR_id == "Disorder") %>%
+  unnest_wider(JDBOR) 
+
+
+disease = disease_df_wider %>%
+  # 1st time unnest to release the 2-dimension list?
+  unnest(cols = names(.)) %>%
+  # 2nd time to nest the single list in each cell?
+  unnest(cols = names(.)) %>%
+  unnest(cols = names(.)) %>%
+  unnest(cols = names("PrevalenceList")) %>%
+  # convert data type
+  readr::type_convert() 
+
+
+disease %>%
+  as_tibble() %>%
+  unnest(cols = names("PrevalenceList"))
+
+### need to figure out how to unlist/unnest PrevalenceList data 
+
+#write_csv(disease, "disease_prev.csv")
+```
+
+```{r}
+disease_prev <- read_csv("disease_prev.csv")
+```
+
+
+
+
+
