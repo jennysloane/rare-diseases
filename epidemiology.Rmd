@@ -29,7 +29,11 @@ df = tibble::as_tibble(data) %>%
   unnest_wider(PrevalenceList) %>% 
   unnest(PrevalenceClass,PrevalenceType,PrevalenceQualification,PrevalenceGeographic,PrevalenceValidationStatus,ValMoy,Source) %>% 
   unnest(PrevalenceClass,PrevalenceType,PrevalenceQualification,PrevalenceGeographic,PrevalenceValidationStatus) %>% 
-  select(-Availability)
+  select(-Availability) %>% 
+  mutate_all(as.character)
+
+ggplot(df,aes(x=PrevalenceClass))+
+  geom_bar()
 
 ```
 
