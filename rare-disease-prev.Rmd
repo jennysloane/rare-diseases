@@ -70,6 +70,9 @@ data_clean = tibble::as_tibble(raw_data) %>%
 
 # Graphing the distribution of diseases 
 
+- Note: some diseases are counted multiple times (when there are multiple sources for the same disease)
+  - Example: Cleft palate is counted 10 times because there's data from different geographic regions 
+
 ```{r fig.width=10, fig.height=7}
 bar_plot <- data_clean %>%
   filter(!(prevalence_class %in% c("Unknown", "NULL", "Not yet documented"))) 
@@ -79,7 +82,7 @@ bar_plot$prevalence_class <- factor(bar_plot$prevalence_class, levels = c("<1 / 
 ggplot(bar_plot,aes(x=prevalence_class, fill=factor(ifelse(prevalence_class=="6-9 / 10 000","Highlighted","Normal")))) +
   geom_bar() +
   scale_fill_manual(name = "prevalence_class", values=c("red","grey50")) +
-  stat_count(geom = "text", colour = "black", size = 4,
+  stat_count(geom = "text", colour = "black", size = 5,
 aes(label = ..count..),position=position_stack(vjust=1)) +
   labs(x = "Prevalence", y = "Frequency", title = "Distribution of Prevalence of Rare Diseases") +
   theme_bw() +
@@ -106,8 +109,11 @@ rd_names %>%
 
 ```
 
-# 6-9 / 10,000 disease names
+# 6-9 / 10,000 "Disease"
 
 ```{r}
-unique(rd_names$name)
+disease_names <- rd_names %>%
+  filter(disorder_type == "Disease")
+
+unique(disease_names$name)
 ```
