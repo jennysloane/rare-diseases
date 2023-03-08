@@ -1,0 +1,113 @@
+---
+title: "Rare Diseases"
+date: "`r Sys.Date()`"
+author: Jenny Sloane
+output:
+  rmdformats::readthedown:
+    self_contained: true
+---
+
+<style type="text/css">
+
+body {
+  font-size: 17pt;
+}
+
+pre {
+  font-size: 15px;
+}
+
+h1.title, h1.title p {
+  font-size: 40px;
+}
+
+h1 { 
+  font-size: 35px;
+}
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+# Orphadata
+
+- <a href="https://www.orphadata.com/" target="_blank">Link to Orphadata website</a>
+- <a href="https://www.orphadata.com/" target="_blank">Link to data</a>
+- **Rare Disease** = A disease that affects fewer than 200,000 people in the United States
+- US population = 331.9 million 
+- 200,000/331.9 million = ~0.0006
+- 6-9/10,000 = .0006 - .0009
+<!-- - 1-5/10,000 = .0001 - .0005 -->
+
+```{r}
+library(xml2)
+library(tidyverse)
+library(ggeasy)
+require(httr)
+library(janitor)
+library(gt)
+
+my_url <- "https://www.orphadata.com/data/xml/en_product9_prev.xml"
+disease_xml <- as_list(read_xml(my_url))
+
+raw_data <- disease_xml$JDBOR
+
+data_clean = tibble::as_tibble(raw_data) %>%
+  unnest_wider(DisorderList) %>% 
+  unnest(Name, OrphaCode, ExpertLink, DisorderType, DisorderGroup) %>% 
+  unnest(DisorderType, DisorderGroup) %>% 
+  unnest(PrevalenceList) %>% 
+  unnest_wider(PrevalenceList) %>% 
+  unnest(PrevalenceClass, PrevalenceType, PrevalenceQualification, PrevalenceGeographic, PrevalenceValidationStatus, ValMoy,Source) %>% 
+  unnest(PrevalenceClass, PrevalenceType, PrevalenceQualification, PrevalenceGeographic, PrevalenceValidationStatus) %>% 
+  select(-Availability) %>% 
+  mutate_all(as.character) %>%
+  clean_names()
+
+```
+
+# Graphing the distribution of diseases 
+
+```{r fig.width=10, fig.height=7}
+bar_plot <- data_clean %>%
+  filter(!(prevalence_class %in% c("Unknown", "NULL", "Not yet documented"))) 
+
+bar_plot$prevalence_class <- factor(bar_plot$prevalence_class, levels = c("<1 / 1 000 000", "1-9 / 1 000 000", "1-9 / 100 000", "1-5 / 10 000", "6-9 / 10 000", ">1 / 1000"))
+
+ggplot(bar_plot,aes(x=prevalence_class, fill=factor(ifelse(prevalence_class=="6-9 / 10 000","Highlighted","Normal")))) +
+  geom_bar() +
+  scale_fill_manual(name = "prevalence_class", values=c("red","grey50")) +
+  stat_count(geom = "text", colour = "black", size = 4,
+aes(label = ..count..),position=position_stack(vjust=1)) +
+  labs(x = "Prevalence", y = "Frequency", title = "Distribution of Prevalence of Rare Diseases") +
+  theme_bw() +
+  easy_remove_legend() +
+  easy_text_size(20) +
+  theme(axis.text = element_text(size = 15)) 
+
+```
+
+
+# Disorder types
+
+- 6-9 / 10,000 only
+
+```{r}
+rd_names <- data_clean %>%
+  filter(prevalence_class == "6-9 / 10 000") %>%
+  select(orpha_code, name, disorder_type, prevalence_class, val_moy, prevalence_geographic, prevalence_validation_status)
+
+rd_names %>%
+  group_by(disorder_type) %>%
+  count() %>%
+  arrange(desc(n)) 
+
+```
+
+# 6-9 / 10,000 disease names
+
+```{r}
+unique(rd_names$name)
+```
