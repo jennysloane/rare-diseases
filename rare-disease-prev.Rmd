@@ -129,6 +129,7 @@ rd_names %>%
 # ALS 
 
 - average of 9-12 months to diagnosis
+- <a href="https://www.orpha.net/consor/cgi-bin/Disease_Search.php?lng=EN&data_id=106&Disease_Disease_Search_diseaseGroup=Amyotrophic-lateral-sclerosis&Disease_Disease_Search_diseaseType=Pat&Disease(s)/group%20of%20diseases=Amyotrophic-lateral-sclerosis&title=Amyotrophic%20lateral%20sclerosis&search=Disease_Search_Simple" target="_blank">Link to Orpha Net: ALS</a>
 
 ```{r}
 data_clean %>%
@@ -156,5 +157,4 @@ data_clean %>%
   select(name, prevalence_class, prevalence_geographic) %>%
   reactable(striped = TRUE)
 ```
-
 
