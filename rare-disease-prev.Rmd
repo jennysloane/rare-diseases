@@ -10,11 +10,11 @@ output:
 <style type="text/css">
 
 body {
-  font-size: 17pt;
+  font-size: 12pt;
 }
 
 pre {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 h1.title, h1.title p {
@@ -112,8 +112,49 @@ rd_names %>%
 # 6-9 / 10,000 "Disease"
 
 ```{r}
+library(reactable)
+
 disease_names <- rd_names %>%
   filter(disorder_type == "Disease")
 
-unique(disease_names$name)
+# unique(disease_names$name)
+
+rd_names %>%
+  filter(disorder_type == "Disease") %>%
+  select(name, prevalence_geographic) %>%
+  reactable(striped = TRUE)
+
 ```
+
+# ALS 
+
+- average of 9-12 months to diagnosis
+
+```{r}
+data_clean %>%
+  filter(grepl('ALS|Amyotrophic|amyotrophic', name)) %>%
+  select(name, prevalence_class, prevalence_geographic) %>%
+  reactable(striped = TRUE)
+```
+
+# Myositis
+- average of over 2 years to diagnosis
+
+```{r}
+data_clean %>%
+  filter(grepl('myositis|Myositis', name)) %>%
+  select(name, prevalence_class, prevalence_geographic) %>%
+  reactable(striped = TRUE)
+```
+
+# Vasculitis 
+- average of 7 months to diagnosis
+
+```{r}
+data_clean %>%
+  filter(grepl('vasculitis|Vasculitis', name)) %>%
+  select(name, prevalence_class, prevalence_geographic) %>%
+  reactable(striped = TRUE)
+```
+
+
